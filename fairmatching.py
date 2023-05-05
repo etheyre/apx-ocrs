@@ -170,7 +170,12 @@ def mu_update_fair_matching(inner_state, i, viewer_weights):
 	
 def opt(weights, fairness):
 	n, m = weights.shape
-	model = gp.Model("fairmatch")
+	
+	env = gp.Env(empty=True)
+	env.setParam('OutputFlag', 0)
+	env.start()
+	
+	model = gp.Model("fairmatch", env=env)
 	x = model.addVars(n, m, vtype=GRB.BINARY)
 	dict_weights = {(i, j): weights[i, j] for i in range(n) for j in range(m)} # to please gurobi
 	
@@ -242,9 +247,11 @@ def test():
 	fairness = np.array([0.1, 0.1, 0.1])
 	weights = unif_distrib(10, 3)
 	m, weights = run(lambda: unif_distrib(10, 3), fairness)
-	print("now, opt -----------")
+	print("now, offline and opt -----------")
 	m_alg = mu_compute_fair_matching(weights, fairness)[0]
-	print(m, score_matching(m, fairness, weights))
-	print(m_alg, score_matching(m_alg, fairness, weights))
+	m_opt = opt(weights, fairness)
+	print("online-apx", m, score_matching(m, fairness, weights))
+	print("offline-apx", m_alg, score_matching(m_alg, fairness, weights))
+	print("opt", m_opt, score_matching(m_opt, fairness, weights))
 
 test()
