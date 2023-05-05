@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np, copy, math
+import numpy as np, copy, math, gurobipy as gp
+from gurobipy import GRB
 
 eps = 0.1
 
@@ -55,7 +56,7 @@ def mu_compute_fair_matching(weights, fairness):
 	for i in range(n):
 		# number of viewers to come after i
 		viewers_left = n - i
-		# invariant: tot_demand = sum(demands)
+		# invariant: tot_demand == sum(demands)
 		tot_demand = mu_match(i, matching, rounded_weights, Q, y,
 						      fairness, demands, viewers_left, tot_demand)
 	
@@ -65,28 +66,27 @@ def mu_compute_fair_matching(weights, fairness):
 
 # Match i
 def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand):
+	n, m = rounded_weights.shape
+	
 	while len(Q[i]) != 0:
 		(k, j) = Q[i].pop()
 		
 		util_ij = rounded_weights[i, j] - y[j]
 		
-		print("hey", rounded_weights[i, j], y[j])
-		
-		if util_ij >= (1+eps)**k:
-			y[j] += eps * util_ij
-			
-			demand_contribution = 1 if demands[j] > 0 else 0
+		if util_ij >= (1+eps)**k:			
 			matching[i] = j
-			demands[j] -= demand_contribution
-			tot_demand -= demand_contribution
+			if demands[j] > 0:
+				demands[j] -= 1
+				tot_demand -= 1
 			
 			if tot_demand > viewers_left:
 				# feasibility problem
+				y[j] += eps * util_ij
 				# find lightest edge to j
 				lightest_viewer = argmin(matching, lambda a, b: rounded_weights[a, b])
 				
 				j_lightest = matching[lightest_viewer]
-				if demands[j_lightest] < fairness[j_lightest]:
+				if demands[j_lightest] < math.floor(fairness[j_lightest] * n):
 					demands[j_lightest] += 1
 					tot_demand += 1
 					
@@ -101,15 +101,15 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 ## The following are update functions for the MU algorithm.
 	
 # This is not used, see next function.
-def mu_update_delete_edge(inner_state, i, j):
-	matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min = inner_state
-	
-	Q[i] = filter(lambda x: x[1] != j, Q[i])
-	
-	if matching[i] == j:
-		tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
-		
-	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
+#def mu_update_delete_edge(inner_state, i, j):
+#	matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min = inner_state
+#	
+#	Q[i] = filter(lambda x: x[1] != j, Q[i])
+#	
+#	if matching[i] == j:
+#		tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
+#		
+#	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
 # Remove all the edges from viewer i.
 def mu_update_delete_vertex_edges(inner_state, i):
@@ -126,7 +126,7 @@ def mu_update_delete_vertex_edges(inner_state, i):
 	match_i = matching[i]
 	if match_i != -1:
 		matching[i] = -1
-		if demands[match_i] < fairness[match_i] * n:
+		if demands[match_i] < math.floor(fairness[match_i] * n):
 			demands[match_i] += 1
 			tot_demand += 1
 		
@@ -147,6 +147,7 @@ def mu_update_add_vertex(inner_state, i, viewer_weights):
 	
 	Q[i].sort(key=lambda x: x[0])
 	
+	print("let's match!", i)
 	tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
 	
 	print(i, "matched to", matching[i])
@@ -165,13 +166,27 @@ def mu_update_fair_matching(inner_state, i, viewer_weights):
 	return inner_state[0], inner_state # the matching and the inner state
 
 
+### To compute the optimum
+	
+def opt(weights, fairness):
+	n, m = weights.shape
+	model = gp.Model("fairmatch")
+	x = model.addVars(n, m, vtype=GRB.BINARY)
+	dict_weights = {(i, j): weights[i, j] for i in range(n) for j in range(m)} # to please gurobi
+	
+	model.addConstrs((gp.quicksum(x[(i, j)] for j in range(m)) <= 1 for i in range(n)))
+	model.addConstrs((gp.quicksum(x[(i, j)] for i in range(n)) >= math.floor(fairness[j] * n) for j in range(m)))
 
+	model.setObjective(x.prod(dict_weights), GRB.MAXIMIZE)
 
-
-
-
-
-
+	model.optimize()
+	
+	matching = [-1]*n
+	for i, j in x.keys():
+		if x[i, j].x == 1:
+			matching[i] = j
+	
+	return matching
 
 ### The following functions are for the rest of the algo
 
@@ -219,6 +234,7 @@ def unif_distrib(n, m):
 	for i in range(n):
 		for j in range(m):
 			weights[i, j] = 50-25*j+1
+			#weights[i, j] = 1
 	
 	return weights
 
