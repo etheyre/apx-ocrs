@@ -22,6 +22,20 @@ def argmin(l, f):
 			
 	return curr_idx
 
+def lightest_viewer_j(j, matching, rounded_weights):
+	# warning: explodes if the list l is empty
+	curr_min = None
+	curr_idx = None
+	
+	for i, x in enumerate(matching):
+		v = rounded_weights[i, j]
+		
+		if (curr_min is None or v < curr_min) and x == j:
+			curr_min = v
+			curr_idx = i
+	
+	return curr_idx
+
 ### The following functions are for the multiplication auction ("mu") algorithm.
 
 # Compute a full fair matching
@@ -55,12 +69,12 @@ def mu_compute_fair_matching(weights, fairness):
 	
 	for i in range(n):
 		# number of viewers to come after i
-		viewers_left = n - i
-		# invariant: tot_demand == sum(demands)
+		viewers_left = n - i - 1
+		
 		tot_demand = mu_match(i, matching, rounded_weights, Q, y,
 						      fairness, demands, viewers_left, tot_demand)
 	
-	# match what's left
+	# TODO match what's left
 	
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
@@ -75,27 +89,29 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 		
 		if util_ij >= (1+eps)**k:			
 			matching[i] = j
-			if demands[j] > 0:
-				demands[j] -= 1
+			demands[j] -= 1
+			if demands[j] >= 0:
 				tot_demand -= 1
 			
 			if tot_demand > viewers_left:
 				# feasibility problem
 				y[j] += eps * util_ij
 				# find lightest edge to j
-				lightest_viewer = argmin(matching, lambda a, b: rounded_weights[a, b])
+				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
 				
-				j_lightest = matching[lightest_viewer]
-				if demands[j_lightest] < math.floor(fairness[j_lightest] * n):
-					demands[j_lightest] += 1
-					tot_demand += 1
-					
 				matching[lightest_viewer] = -1
+				demands[j] += 1
+				if demands[j] > 0:
+					tot_demand += 1
+				
+#				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
 						              fairness, demands, viewers_left, tot_demand)
 				# TODO here we don't return?
+				return tot_demand
 			else:
 				return tot_demand
+	
 	return tot_demand
 
 ## The following are update functions for the MU algorithm.
@@ -147,10 +163,10 @@ def mu_update_add_vertex(inner_state, i, viewer_weights):
 	
 	Q[i].sort(key=lambda x: x[0])
 	
-	print("let's match!", i)
+#	print("let's match!", i)
 	tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
 	
-	print(i, "matched to", matching[i])
+#	print(i, "matched to", matching[i])
 	
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
@@ -160,7 +176,7 @@ def mu_update_fair_matching(inner_state, i, viewer_weights):
 	
 	# Here, we can copy the inner_state if we want to have no correlation
 	inner_state = mu_update_delete_vertex_edges(inner_state, i)
-	print("upd_fm_edges", inner_state[0])
+#	print("upd_fm_edges", inner_state[0])
 	inner_state = mu_update_add_vertex(inner_state, i, viewer_weights)
 	
 	return inner_state[0], inner_state # the matching and the inner state
@@ -238,20 +254,24 @@ def unif_distrib(n, m):
 	weights = np.zeros((n, m))
 	for i in range(n):
 		for j in range(m):
-			weights[i, j] = 50-25*j+1
-			#weights[i, j] = 1
+			weights[i, j] = rng.random()*3+1
+			assert(weights[i, j] >= 0)
 	
 	return weights
 
 def test():
 	fairness = np.array([0.1, 0.1, 0.1])
 	weights = unif_distrib(10, 3)
-	m, weights = run(lambda: unif_distrib(10, 3), fairness)
-	print("now, offline and opt -----------")
+	#m, weights = run(lambda: unif_distrib(10, 3), fairness)
+	#print("now, offline and opt -----------")
 	m_alg = mu_compute_fair_matching(weights, fairness)[0]
 	m_opt = opt(weights, fairness)
-	print("online-apx", m, score_matching(m, fairness, weights))
-	print("offline-apx", m_alg, score_matching(m_alg, fairness, weights))
-	print("opt", m_opt, score_matching(m_opt, fairness, weights))
+	#print("online-apx", m, score_matching(m, fairness, weights))
+	s_alg, fair_alg = score_matching(m_alg, fairness, weights)
+	s_opt, fair_opt = score_matching(m_opt, fairness, weights)
+	print("offline-apx", m_alg, s_alg, fair_alg)
+	print("opt", m_opt, s_opt, fair_opt)
+	assert(fair_alg == 0 and fair_opt == 0)
+	assert(s_alg <= (1+eps) * s_opt)
 
 test()
