@@ -142,6 +142,7 @@ def mu_update_delete_vertex_edges(inner_state, i):
 	match_i = matching[i]
 	if match_i != -1:
 		matching[i] = -1
+		# TODO that's not how it works anymore
 		if demands[match_i] < math.floor(fairness[match_i] * n):
 			demands[match_i] += 1
 			tot_demand += 1
@@ -219,16 +220,50 @@ def ocrs(sampled_weights, online_weights, fairness, init_inner_sol, update_inner
 	ocrs_matching = [-1]*n
 	
 	for i in range(n):
-		print("---- update", i)
+		#print("---- update", i)
 		viewer_matching, inner_state = update_inner_sol(inner_state, i, online_weights[i, :])
 		ocrs_matching[i] = viewer_matching[i]
 	
 	return ocrs_matching
 
-def run(distrib, fairness):
+def run_dyn_alg(distrib, fairness, online_weights=None):
 	sampled_weights = distrib()
-	online_weights = distrib()
-	matching = ocrs(sampled_weights, online_weights, fairness, mu_compute_fair_matching, mu_update_fair_matching)
+	online_weights = distrib() if online_weights is None else online_weights
+	matching = ocrs(sampled_weights, online_weights, fairness,
+				    mu_compute_fair_matching, mu_update_fair_matching)
+	return matching, online_weights
+
+def mu_recompute_fair_matching(inner_state, i, weights_i):
+	weights = inner_state[1]
+	fairness = inner_state[4]
+	here_weights = np.copy(weights)
+	here_weights[i, :] = weights_i
+	out_state = mu_compute_fair_matching(here_weights, fairness)
+	return out_state[0], out_state
+
+def run_off_alg(distrib, fairness, online_weights=None):
+	sampled_weights = distrib()
+	online_weights = distrib() if online_weights is None else online_weights
+	matching = ocrs(sampled_weights, online_weights, fairness,
+				    mu_compute_fair_matching, mu_recompute_fair_matching)
+	return matching, online_weights
+
+def opt_precompute(weights, fairness):
+	return (weights, fairness)
+
+def opt_recompute(inner_state, i, weights_i):
+	weights = inner_state[0]
+	fairness = inner_state[1]
+	here_weights = np.copy(weights)
+	here_weights[i, :] = weights_i
+	matching = opt(here_weights, fairness)
+	return matching, (weights, fairness)
+
+def run_ocrs_opt(distrib, fairness, online_weights=None):
+	sampled_weights = distrib()
+	online_weights = distrib() if online_weights is None else online_weights
+	matching = ocrs(sampled_weights, online_weights, fairness,
+				    opt_precompute, opt_recompute)
 	return matching, online_weights
 
 # Output the weight collected by the matching, and the total deficit in fairness.
@@ -246,8 +281,8 @@ def score_matching(matching, fairness, weights):
 		demands[j] -= 1
 	
 	demand_deficit = int(sum(filter(lambda x: x > 0, demands)))
-	
-	return (matching_weight, demand_deficit)
+#	demands = np.array(list(map(lambda x: max(0, x), demands)))
+	return (matching_weight, demand_deficit, demands)
 
 def unif_distrib(n, m):
 	rng = np.random.default_rng()
@@ -259,19 +294,56 @@ def unif_distrib(n, m):
 	
 	return weights
 
+def fairness_ocrs_mu():
+	n = 1000
+	m = 10
+	N = 30
+	fairness = np.array([0.095]*m)
+
+	tot_demands = np.zeros((m,), int)
+	for i in range(N):
+		print(i)
+		m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
+		s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+		tot_demands += final_demands_ocrs.astype(int)
+	
+	print(tot_demands/N) # here, negative is good
+
+def fairness_ocrs_opt():
+	fairness = np.array([0.3, 0.4, 0.1])
+	n = 10
+	m = 3
+	N = 100
+	tot_demands = np.zeros((m,), int)
+	for i in range(N):
+		m_ocrs, weights = run_ocrs_opt(lambda: unif_distrib(n, m), fairness)
+		s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+		tot_demands += final_demands_ocrs.astype(int)
+	
+	print(tot_demands/N)
+
 def test():
-	fairness = np.array([0.1, 0.1, 0.1])
+	fairness = np.array([0.3, 0.4, 0.1])
 	weights = unif_distrib(10, 3)
-	#m, weights = run(lambda: unif_distrib(10, 3), fairness)
-	#print("now, offline and opt -----------")
+#	m, weights = run_dyn_alg(lambda: unif_distrib(10, 3), fairness)
+#	print("online-apx", m, score_matching(m, fairness, weights))
+	m_ocrs_apx, _ = run_off_alg(lambda: unif_distrib(10, 3), fairness, online_weights=weights)
+	m_ocrs_opt, _ = run_ocrs_opt(lambda: unif_distrib(10, 3), fairness, online_weights=weights)
 	m_alg = mu_compute_fair_matching(weights, fairness)[0]
 	m_opt = opt(weights, fairness)
-	#print("online-apx", m, score_matching(m, fairness, weights))
-	s_alg, fair_alg = score_matching(m_alg, fairness, weights)
-	s_opt, fair_opt = score_matching(m_opt, fairness, weights)
+	
+	s_ocrs_apx, fair_ocrs_apx, _ = score_matching(m_ocrs_apx, fairness, weights)
+	s_ocrs_opt, fair_ocrs_opt, _ = score_matching(m_ocrs_opt, fairness, weights)
+	s_alg, fair_alg, _ = score_matching(m_alg, fairness, weights)
+	s_opt, fair_opt, _ = score_matching(m_opt, fairness, weights)
+	
+	print("ocrs-opt", m_ocrs_opt, s_ocrs_opt, fair_ocrs_opt)
+	print("ocrs-apx", m_ocrs_apx, s_ocrs_apx, fair_ocrs_apx)
 	print("offline-apx", m_alg, s_alg, fair_alg)
 	print("opt", m_opt, s_opt, fair_opt)
 	assert(fair_alg == 0 and fair_opt == 0)
 	assert(s_alg <= (1+eps) * s_opt)
 
-test()
+#test()
+fairness_ocrs_mu()
+#fairness_ocrs_opt()
