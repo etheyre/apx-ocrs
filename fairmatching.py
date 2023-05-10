@@ -284,6 +284,8 @@ def score_matching(matching, fairness, weights):
 		matching_weight += weights[i, j]
 		demands[j] -= 1
 	
+	# demands is fairness - loads
+	
 	demand_deficit = int(sum(filter(lambda x: x > 0, demands)))
 #	demands = np.array(list(map(lambda x: max(0, x), demands)))
 	return (matching_weight, demand_deficit, demands)
@@ -333,7 +335,7 @@ def fairness_ocrs_mu_parallel():
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)), "(that is", str(datetime.timedelta(seconds=(time.time()-t)/N)), "s/it)")
 	
-	tot_demands = sum([x[2] for x in res])
+	tot_demands = sum([x[2] for x in res]).astype(float)/N
 	
 	print(tot_demands)
 	
