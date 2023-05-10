@@ -295,7 +295,7 @@ def unif_distrib(n, m):
 	return weights
 
 def fairness_ocrs_mu():
-	n = 1000
+	n = 200
 	m = 10
 	N = 30
 	fairness = np.array([0.095]*m)
@@ -305,7 +305,6 @@ def fairness_ocrs_mu():
 		print(i)
 		m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
 		s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-		print(fair_ocrs, final_demands_ocrs)
 		tot_demands += final_demands_ocrs.astype(int)
 	
 	print(tot_demands/N) # here, negative is good
@@ -314,6 +313,7 @@ def run_analyze_ocrs_mu(args):
 	n, m, fairness = args
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+	print(fair_ocrs, final_demands_ocrs)
 	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
