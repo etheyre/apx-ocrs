@@ -77,6 +77,7 @@ def mu_compute_fair_matching(weights, fairness):
 	# TODO match what's left
 	print(tot_demand, demands)
 	assert(tot_demand == 0 and sum(demands) <= 0)
+	assert(all((demands[i] <= np.floor(fairness[î]*n)) for i in range(n)))
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
 # Match i
