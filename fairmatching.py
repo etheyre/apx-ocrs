@@ -95,9 +95,11 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 			if demands[j] >= 0:
 				tot_demand -= 1
 			
+			if tot_demand >= viewers_left:
+				y[j] += eps * util_ij
+			
 			if tot_demand > viewers_left:
 				# feasibility problem
-				y[j] += eps * util_ij
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
 				
