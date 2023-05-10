@@ -316,9 +316,9 @@ def run_analyze_ocrs_mu(args):
 	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
-	n = 100
+	n = 1000
 	m = 10
-	N = 500
+	N = 50
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
