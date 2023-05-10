@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np, copy, math, gurobipy as gp
+import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os
 from gurobipy import GRB
 
 eps = 0.1
@@ -309,6 +309,30 @@ def fairness_ocrs_mu():
 	
 	print(tot_demands/N) # here, negative is good
 
+def run_analyze_ocrs_mu(args):
+	n, m, fairness = args
+	# TODO is random good on multiple threads?
+	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
+	print(weights[0][0]) # just to make sure random is random
+	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
+
+def fairness_ocrs_mu_parallel():
+	n = 100
+	m = 10
+	N = 60
+	fairness = np.array([0.095]*m)
+	
+	print("starting on", os.cpu_count(), "glorious CPUs")
+
+	with mp.Pool() as p:
+		res = p.map(run_analyze_ocrs_mu, [(n, m, fairness)]*N)
+	
+	tot_demands = sum([res[2] for i in range(N)])
+	
+	print(tot_demands)
+	
+
 def fairness_ocrs_opt():
 	fairness = np.array([0.3, 0.4, 0.1])
 	n = 10
@@ -345,5 +369,5 @@ def test():
 	assert(s_alg <= (1+eps) * s_opt)
 
 #test()
-fairness_ocrs_mu()
+fairness_ocrs_mu_parallel()
 #fairness_ocrs_opt()
