@@ -311,9 +311,7 @@ def fairness_ocrs_mu():
 
 def run_analyze_ocrs_mu(args):
 	n, m, fairness = args
-	# TODO is random good on multiple threads?
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
-	print(weights[0][0]) # just to make sure random is random
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
 	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
 
@@ -328,7 +326,7 @@ def fairness_ocrs_mu_parallel():
 	with mp.Pool() as p:
 		res = p.map(run_analyze_ocrs_mu, [(n, m, fairness)]*N)
 	
-	tot_demands = sum([res[2] for i in range(N)])
+	tot_demands = sum([x[2] for x in res])
 	
 	print(tot_demands)
 	
