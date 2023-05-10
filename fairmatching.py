@@ -95,7 +95,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 			if demands[j] >= 0:
 				tot_demand -= 1
 			
-			if tot_demand >= viewers_left:
+			if tot_demand > viewers_left:
 				y[j] += eps * util_ij
 			
 			if tot_demand > viewers_left:
