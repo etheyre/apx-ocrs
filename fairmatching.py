@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os
+import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
 from gurobipy import GRB
 
 eps = 0.1
@@ -305,6 +305,7 @@ def fairness_ocrs_mu():
 		print(i)
 		m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
 		s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+		print(fair_ocrs, final_demands_ocrs)
 		tot_demands += final_demands_ocrs.astype(int)
 	
 	print(tot_demands/N) # here, negative is good
@@ -322,9 +323,11 @@ def fairness_ocrs_mu_parallel():
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
-
+	t = time.time()
 	with mp.Pool() as p:
 		res = p.map(run_analyze_ocrs_mu, [(n, m, fairness)]*N)
+	
+	print("took", str(datetime.timedelta(seconds=time.time()-t)), "(that is", str(datetime.timedelta(seconds=(time.time()-t)/N)), "s/it)")
 	
 	tot_demands = sum([x[2] for x in res])
 	
