@@ -318,14 +318,15 @@ def run_analyze_ocrs_mu(args):
 	n, m, fairness = args
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
 	m_opt = opt(weights, fairness)
-	s_opt, _, _ = score_matching(m_opt, fairness, weights)
+	s_opt = 1
+	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
-	n = 100
+	n = 1000
 	m = 10
-	N = 1000
+	N = 50
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
