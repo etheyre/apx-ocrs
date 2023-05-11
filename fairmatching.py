@@ -101,8 +101,6 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
 				
-				print(i, lightest_viewer, demands[j], tot_demand, viewers_left)
-				
 				matching[lightest_viewer] = -1
 				demands[j] += 1
 				if demands[j] > 0:
