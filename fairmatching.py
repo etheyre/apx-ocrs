@@ -75,7 +75,6 @@ def mu_compute_fair_matching(weights, fairness):
 						      fairness, demands, viewers_left, tot_demand)
 	
 	# TODO match what's left
-	print(matching)
 	assert(tot_demand == 0 and sum(demands) <= 0)
 	assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
@@ -88,10 +87,8 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 		(k, j) = Q[i].pop()
 		
 		util_ij = rounded_weights[i, j] - y[j]
-		print(i, j, util_ij >= (1+eps)**k)
 		if util_ij >= (1+eps)**k:
 			matching[i] = j
-			print("let match", matching[i])
 			demands[j] -= 1
 			if demands[j] >= 0:
 				tot_demand -= 1
