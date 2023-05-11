@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
+import statistics as stats
 from gurobipy import GRB
 
 eps = 0.1
@@ -316,8 +317,10 @@ def fairness_ocrs_mu():
 def run_analyze_ocrs_mu(args):
 	n, m, fairness = args
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
+	m_opt = opt(weights, fairness)
+	s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
+	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
 	n = 100
@@ -332,8 +335,9 @@ def fairness_ocrs_mu_parallel():
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
-	tot_demands = sum([x[2] for x in res]).astype(float)/N
-	
+	tot_demands = sum([x[3] for x in res]).astype(float)/N
+	ratios = [x[1] for x in res]
+	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 	print(tot_demands)
 	
 def fairness_ocrs_opt():
