@@ -64,7 +64,7 @@ def mu_compute_fair_matching(weights, fairness):
 		# we will take the last element every time
 		Q[i].sort(key=lambda x: x[0])
 	
-	demands = np.floor(fairness * n) # fairness needs to be a numpy array
+	demands = np.floor(fairness * n).astype(int) # fairness needs to be a numpy array
 	tot_demand = sum(demands)
 	
 	for i in range(n):
@@ -75,7 +75,7 @@ def mu_compute_fair_matching(weights, fairness):
 						      fairness, demands, viewers_left, tot_demand)
 	
 	# TODO match what's left
-	
+	print(matching)
 	assert(tot_demand == 0 and sum(demands) <= 0)
 	assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
@@ -88,20 +88,23 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 		(k, j) = Q[i].pop()
 		
 		util_ij = rounded_weights[i, j] - y[j]
-		
-		if util_ij >= (1+eps)**k:			
+		print(i, j, util_ij >= (1+eps)**k)
+		if util_ij >= (1+eps)**k:
 			matching[i] = j
+			print("let match", matching[i])
 			demands[j] -= 1
 			if demands[j] >= 0:
 				tot_demand -= 1
 			
-			if tot_demand > viewers_left:
+			if tot_demand > viewers_left or demands[j] == 0: # TODO investigate
 				y[j] += eps * util_ij
 			
 			if tot_demand > viewers_left:
 				# feasibility problem
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
+				
+				print(i, lightest_viewer, demands[j], tot_demand, viewers_left)
 				
 				matching[lightest_viewer] = -1
 				demands[j] += 1
@@ -301,9 +304,9 @@ def unif_distrib(n, m):
 	return weights
 
 def fairness_ocrs_mu():
-	n = 200
+	n = 100
 	m = 10
-	N = 30
+	N = 1
 	fairness = np.array([0.095]*m)
 
 	tot_demands = np.zeros((m,), int)
@@ -323,9 +326,9 @@ def run_analyze_ocrs_mu(args):
 	return (s_ocrs, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
-	n = 1000
+	n = 100
 	m = 10
-	N = 50
+	N = 100
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
@@ -333,13 +336,12 @@ def fairness_ocrs_mu_parallel():
 	with mp.Pool() as p:
 		res = p.map(run_analyze_ocrs_mu, [(n, m, fairness)]*N)
 	
-	print("took", str(datetime.timedelta(seconds=time.time()-t)), "(that is", str(datetime.timedelta(seconds=(time.time()-t)/N)), "s/it)")
+	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
 	tot_demands = sum([x[2] for x in res]).astype(float)/N
 	
 	print(tot_demands)
 	
-
 def fairness_ocrs_opt():
 	fairness = np.array([0.3, 0.4, 0.1])
 	n = 10
@@ -377,4 +379,5 @@ def test():
 
 #test()
 fairness_ocrs_mu_parallel()
+#fairness_ocrs_mu()
 #fairness_ocrs_opt()
