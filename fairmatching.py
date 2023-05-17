@@ -378,12 +378,12 @@ def run_analyze_stupidest(args):
 def run_stupidest_parallel(): # TODO try with non ind distrib
 	n = 100
 	m = 10
-	N = 1000
+	N = 10000
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
 	t = time.time()
-	with mp.Pool(1) as p:
+	with mp.Pool() as p:
 		res = p.map(run_analyze_stupidest, [(n, m, fairness)]*N)
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
