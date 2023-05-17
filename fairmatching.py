@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
-import statistics as stats
+import statistics as stats, random
 from gurobipy import GRB
 
 eps = 0.1
@@ -312,6 +312,20 @@ def unif_distrib(n, m):
 	
 	return weights
 
+def liked_distrib(n, m):
+	# make ten movie categories (j%10) and assign a number l in [0, 9] to each
+	# then, draw the weights in random(l/10, (l+1)/10) for each category
+	# really have we seen something so arbitrary
+	k = 10
+	l = [random.randint(0, 10) for i in range(k)]
+	rng = np.random.default_rng()
+	weights = np.zeros((n, m))
+	for i in range(n):
+		for j in range(m):
+			weights[i, j] = rng.uniform(l[i%k]/k, (l[i%k]+1)/10)
+	
+	return weights
+
 def fairness_ocrs_mu():
 	n = 100
 	m = 10
@@ -369,7 +383,7 @@ def fairness_ocrs_opt():
 
 def run_analyze_stupidest(args):
 	n, m, fairness = args
-	m_ocrs, weights = run_ocrs_stupidest_algo(lambda: unif_distrib(n, m), fairness)
+	m_ocrs, weights = run_ocrs_stupidest_algo(lambda: liked_distrib(n, m), fairness)
 	m_opt = opt(weights, fairness)
 	s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
