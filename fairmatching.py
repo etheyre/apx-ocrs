@@ -317,10 +317,10 @@ def liked_distrib(n, m):
 	# then, draw the weights in random(l/10, (l+1)/10) for each category
 	# really have we seen something so arbitrary
 	k = 10
-	l = [random.randint(0, 10) for i in range(k)]
 	rng = np.random.default_rng()
 	weights = np.zeros((n, m))
 	for i in range(n):
+		l = [random.randint(0, 10) for i in range(k)]
 		for j in range(m):
 			weights[i, j] = rng.uniform(l[i%k]/k, (l[i%k]+1)/10)
 	
