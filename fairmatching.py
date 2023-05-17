@@ -269,6 +269,19 @@ def run_ocrs_opt(distrib, fairness, online_weights=None):
 				    opt_precompute, opt_recompute)
 	return matching, online_weights
 
+def stupidest_precompute(weights, fairness):
+	return opt(weights, fairness)
+
+def stupidest_recompute(inner_state, i, weights_i):
+	return inner_state, inner_state
+
+def run_ocrs_stupidest_algo(distrib, fairness, online_weights=None):
+	sampled_weights = distrib()
+	online_weights = distrib() if online_weights is None else online_weights
+	matching = ocrs(sampled_weights, online_weights, fairness,
+				    stupidest_precompute, stupidest_recompute)
+	return matching, online_weights
+
 # Output the weight collected by the matching, and the total deficit in fairness.
 def score_matching(matching, fairness, weights):
 	n, m = weights.shape
@@ -324,9 +337,9 @@ def run_analyze_ocrs_mu(args):
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int))
 
 def fairness_ocrs_mu_parallel():
-	n = 1000
+	n = 100
 	m = 10
-	N = 50
+	N = 1000
 	fairness = np.array([0.095]*m)
 	
 	print("starting on", os.cpu_count(), "glorious CPUs")
@@ -354,6 +367,30 @@ def fairness_ocrs_opt():
 	
 	print(tot_demands/N)
 
+def run_analyze_stupidest(args):
+	n, m, fairness = args
+	m_ocrs, weights = run_ocrs_stupidest_algo(lambda: unif_distrib(n, m), fairness)
+	m_opt = opt(weights, fairness)
+	s_opt, _, _ = score_matching(m_opt, fairness, weights)
+	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+	return (s_ocrs, s_opt)
+
+def run_stupidest_parallel(): # TODO try with non ind distrib
+	n = 100
+	m = 10
+	N = 1000
+	fairness = np.array([0.095]*m)
+	
+	print("starting on", os.cpu_count(), "glorious CPUs")
+	t = time.time()
+	with mp.Pool(1) as p:
+		res = p.map(run_analyze_stupidest, [(n, m, fairness)]*N)
+	
+	print("took", str(datetime.timedelta(seconds=time.time()-t)))
+	
+	ratios = [x[0]/x[1] for x in res]
+	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
+
 def test():
 	fairness = np.array([0.3, 0.4, 0.1])
 	weights = unif_distrib(10, 3)
@@ -377,6 +414,7 @@ def test():
 	assert(s_alg <= (1+eps) * s_opt)
 
 #test()
-fairness_ocrs_mu_parallel()
+#fairness_ocrs_mu_parallel()
+run_stupidest_parallel()
 #fairness_ocrs_mu()
 #fairness_ocrs_opt()
