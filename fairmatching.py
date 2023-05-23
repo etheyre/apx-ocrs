@@ -66,6 +66,7 @@ def mu_compute_fair_matching(weights, fairness):
 		Q[i].sort(key=lambda x: x[0])
 	
 	demands = np.floor(fairness * n).astype(int) # fairness needs to be a numpy array
+	print("*", demands)
 	tot_demand = sum(demands)
 	
 	for i in range(n):
