@@ -454,6 +454,7 @@ def compare_running_times():
 	time_data = []
 	params = [(n, m, np.array([1/(m+1)]*m)) for (n, m) in itt.product([10, 50, 1000, 10000], [1, 10, 20, 100, 500])]
 	for (n, m, fairness) in params:
+		print("start", n, m)
 		times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
 		times_opt, ratios_opt, avg_leftover_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
 		
