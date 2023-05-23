@@ -374,7 +374,7 @@ def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
-	return [x[-1] for x in res], ratios
+	return [x[-1] for x in res], ratios, tot_demands
 	
 def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	print("starting on", os.cpu_count(), "glorious CPUs")
@@ -388,7 +388,7 @@ def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
-	return [x[-1] for x in res], ratios
+	return [x[-1] for x in res], ratios, tot_demands
 
 def fairness_ocrs_opt(fairness, n=10, m=3, N=100):
 	tot_demands = np.zeros((m,), int)
@@ -453,15 +453,15 @@ def compare_running_times():
 	time_data = []
 	params = [(n, m, np.array([0.95]*m)) for (n, m) in itt.product([10, 50, 1000, 10000], [1, 10, 20, 100, 500])]
 	for (n, m, fairness) in params:
-		times_mu, ratios_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
-		times_opt, ratios_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
+		times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
+		times_opt, ratios_opt, avg_leftover_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
 		
 		avg_time_mu = avg(times_mu)
 		avg_ratio_mu = avg(ratios_mu)
 		avg_time_opt = avg(times_opt)
 		avg_ratio_opt = avg(ratios_opt)
-		time_data.append((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt))
-		print((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt))
+		time_data.append((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt, avg_leftover_mu, avg_leftover_opt))
+		print((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt, avg_leftover_mu, avg_leftover_opt))
 	
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
