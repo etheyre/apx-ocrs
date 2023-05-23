@@ -77,8 +77,9 @@ def mu_compute_fair_matching(weights, fairness):
 	
 	# TODO match what's left
 	print(matching)
-	assert(tot_demand == 0 and sum(demands) <= 0)
-	assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
+	#assert(tot_demand == 0 and sum(demands) <= 0)
+	# TODO WAIT this is exactly the opposite of what I want!!!
+	#assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
 # Match i
@@ -466,6 +467,7 @@ def compare_running_times():
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
 
+compare_running_times()
 #test()
 #fairness_ocrs_mu_parallel()
 #run_stupidest_parallel()
