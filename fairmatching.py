@@ -76,6 +76,7 @@ def mu_compute_fair_matching(weights, fairness):
 						      fairness, demands, viewers_left, tot_demand)
 	
 	# TODO match what's left
+	print(fairness, weights)
 	print(matching)
 	#assert(tot_demand == 0 and sum(demands) <= 0)
 	# TODO WAIT this is exactly the opposite of what I want!!!
