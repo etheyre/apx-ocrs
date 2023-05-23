@@ -350,7 +350,7 @@ def run_analyze_ocrs_mu(args):
 	s_opt = 1
 	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int), time.time()-start)
+	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
 
 def run_analyze_ocrs_opt(args):
 	n, m, fairness = args
@@ -360,7 +360,7 @@ def run_analyze_ocrs_opt(args):
 	s_opt = 1
 	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int), time.time()-start)
+	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
 
 def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):	
 	print("starting on", os.cpu_count(), "glorious CPUs")
@@ -370,7 +370,7 @@ def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
-	tot_demands = sum([x[3] for x in res]).astype(float)/N
+	tot_demands = sum([x[3] for x in res])/N
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
@@ -384,7 +384,7 @@ def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
-	tot_demands = sum([x[3] for x in res]).astype(float)/N
+	tot_demands = sum([x[3] for x in res])/N
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
