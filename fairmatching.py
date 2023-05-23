@@ -76,6 +76,7 @@ def mu_compute_fair_matching(weights, fairness):
 						      fairness, demands, viewers_left, tot_demand)
 	
 	# TODO match what's left
+	print(matching)
 	assert(tot_demand == 0 and sum(demands) <= 0)
 	assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
@@ -452,13 +453,15 @@ def compare_running_times():
 	time_data = []
 	params = [(n, m, np.array([0.95]*m)) for (n, m) in itt.product([10, 50, 1000, 10000], [1, 10, 20, 100, 500])]
 	for (n, m, fairness) in params:
-		times_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
-		times_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
+		times_mu, ratios_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
+		times_opt, ratios_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
 		
 		avg_time_mu = avg(times_mu)
+		avg_ratio_mu = avg(ratios_mu)
 		avg_time_opt = avg(times_opt)
-		time_data.append((n, m, avg_time_mu, avg_time_opt))
-		print((n, m, avg_time_mu, avg_time_opt))
+		avg_ratio_opt = avg(ratios_opt)
+		time_data.append((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt))
+		print((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt))
 	
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
