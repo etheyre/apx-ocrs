@@ -374,7 +374,7 @@ def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
-	return [x[-1] for x in res], ratios, tot_demands
+	return [x[-1] for x in res], ratios, list(tot_demands)
 	
 def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	print("starting on", os.cpu_count(), "glorious CPUs")
@@ -388,7 +388,7 @@ def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
-	return [x[-1] for x in res], ratios, tot_demands
+	return [x[-1] for x in res], ratios, list(tot_demands)
 
 def fairness_ocrs_opt(fairness, n=10, m=3, N=100):
 	tot_demands = np.zeros((m,), int)
