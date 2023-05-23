@@ -370,7 +370,7 @@ def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
-	tot_demands = sum([x[3] for x in res])/N
+	tot_demands = sum([np.array(x[3]) for x in res])/N
 	ratios = [x[1] for x in res]
 #	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
 #	print(tot_demands)
