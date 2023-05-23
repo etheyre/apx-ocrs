@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
-import statistics as stats, random
+import statistics as stats, random, itertools as itt
 from gurobipy import GRB
 
 eps = 0.1
@@ -343,19 +343,25 @@ def fairness_ocrs_mu():
 
 def run_analyze_ocrs_mu(args):
 	n, m, fairness = args
+	start = time.time()
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
 	#m_opt = opt(weights, fairness)
 	s_opt = 1
 	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int))
+	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int), time.time()-start)
 
-def fairness_ocrs_mu_parallel():
-	n = 100
-	m = 10
-	N = 1000
-	fairness = np.array([0.095]*m)
-	
+def run_analyze_ocrs_opt(args):
+	n, m, fairness = args
+	start = time.time()
+	m_ocrs, weights = run_ocrs_opt(lambda: unif_distrib(n, m), fairness)
+	#m_opt = opt(weights, fairness)
+	s_opt = 1
+	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
+	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, final_demands_ocrs.astype(int), time.time()-start)
+
+def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):	
 	print("starting on", os.cpu_count(), "glorious CPUs")
 	t = time.time()
 	with mp.Pool() as p:
@@ -365,14 +371,25 @@ def fairness_ocrs_mu_parallel():
 	
 	tot_demands = sum([x[3] for x in res]).astype(float)/N
 	ratios = [x[1] for x in res]
-	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
-	print(tot_demands)
+#	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
+#	print(tot_demands)
+	return [x[-1] for x in res]
 	
-def fairness_ocrs_opt():
-	fairness = np.array([0.3, 0.4, 0.1])
-	n = 10
-	m = 3
-	N = 100
+def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
+	print("starting on", os.cpu_count(), "glorious CPUs")
+	t = time.time()
+	with mp.Pool() as p:
+		res = p.map(run_analyze_ocrs_opt, [(n, m, fairness)]*N)
+	
+	print("took", str(datetime.timedelta(seconds=time.time()-t)))
+	
+	tot_demands = sum([x[3] for x in res]).astype(float)/N
+	ratios = [x[1] for x in res]
+#	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
+#	print(tot_demands)
+	return [x[-1] for x in res]
+
+def fairness_ocrs_opt(fairness, n=10, m=3, N=100):
 	tot_demands = np.zeros((m,), int)
 	for i in range(N):
 		m_ocrs, weights = run_ocrs_opt(lambda: unif_distrib(n, m), fairness)
@@ -427,8 +444,27 @@ def test():
 	assert(fair_alg == 0 and fair_opt == 0)
 	assert(s_alg <= (1+eps) * s_opt)
 
+def avg(l):
+	return sum(l)/len(l)
+
+def compare_running_times():
+	N = 50
+	time_data = []
+	params = [(n, m, np.array([0.95]*m)) for (n, m) in itt.product([10, 50, 1000, 10000], [1, 10, 20, 100, 500])]
+	for (n, m, fairness) in params:
+		times_mu = fairness_ocrs_mu_parallel(fairness, n, m, N)
+		times_opt = fairness_ocrs_opt_parallel(fairness, n, m, N)
+		
+		avg_time_mu = avg(times_mu)
+		avg_time_opt = avg(times_opt)
+		time_data.append((n, m, avg_time_mu, avg_time_opt))
+		print((n, m, avg_time_mu, avg_time_opt))
+	
+	with open("times.dat", "w") as f:
+		f.write(str(time_data))
+
 #test()
 #fairness_ocrs_mu_parallel()
-run_stupidest_parallel()
+#run_stupidest_parallel()
 #fairness_ocrs_mu()
 #fairness_ocrs_opt()
