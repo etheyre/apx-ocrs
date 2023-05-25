@@ -120,7 +120,6 @@ def run_analyze_ocrs_opt(args):
 	s_opt = 1
 	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
-	print(type(s_ocrs), type(fair_ocrs), type(final_demands_ocrs[0]))
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
 
 def run_analyze_stupidest(args):
@@ -197,7 +196,7 @@ def compare_running_times():
 		avg_time_opt = avg(times_opt)
 		avg_ratio_opt = avg(ratios_opt)
 		time_data.append((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt, avg_leftover_mu, avg_leftover_opt))
-		print((n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt, avg_leftover_mu, avg_leftover_opt))
+		print("res", (n, m, avg_time_mu, avg_time_opt, avg_ratio_mu, avg_ratio_opt, avg_leftover_mu, avg_leftover_opt))
 	
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
