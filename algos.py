@@ -202,11 +202,15 @@ def opt(weights, fairness):
 
 	model.setObjective(x.prod(dict_weights), GRB.MAXIMIZE)
 
-	model.optimize()
-	
-	matching = [-1]*n
-	for i, j in x.keys():
-		if x[i, j].x == 1:
-			matching[i] = j
+	try:
+		model.optimize()
+		
+		matching = [-1]*n
+		for i, j in x.keys():
+			if x[i, j].x == 1:
+				matching[i] = j
+	except x:
+		print("wooooooops", x)
+		exit(0)
 	
 	return matching
