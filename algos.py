@@ -1,6 +1,7 @@
 import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
 import statistics as stats, random, itertools as itt
 from gurobipy import GRB
+import scipy.optimize.linprog as linprog
 
 eps = 0.1
 
@@ -189,28 +190,47 @@ def mu_update_fair_matching(inner_state, i, viewer_weights):
 def opt(weights, fairness):
 	n, m = weights.shape
 	
-	env = gp.Env(empty=True)
-	env.setParam('OutputFlag', 0)
-	env.start()
+#	env = gp.Env(empty=True)
+#	env.setParam('OutputFlag', 0)
+#	env.start()
+#	
+#	model = gp.Model("fairmatch", env=env)
+#	x = model.addVars(n, m, vtype=GRB.BINARY)
+#	dict_weights = {(i, j): weights[i, j] for i in range(n) for j in range(m)} # to please gurobi
+#	
+#	model.addConstrs((gp.quicksum(x[(i, j)] for j in range(m)) <= 1 for i in range(n)))
+#	model.addConstrs((gp.quicksum(x[(i, j)] for i in range(n)) >= math.floor(fairness[j] * n) for j in range(m)))
+#
+#	model.setObjective(x.prod(dict_weights), GRB.MAXIMIZE)
+#
+#	model.optimize()
 	
-	model = gp.Model("fairmatch", env=env)
-	x = model.addVars(n, m, vtype=GRB.BINARY)
-	dict_weights = {(i, j): weights[i, j] for i in range(n) for j in range(m)} # to please gurobi
+	obj = -weights.flatten()
+	# obj[i*m + j] is -weights[i, j]
 	
-	model.addConstrs((gp.quicksum(x[(i, j)] for j in range(m)) <= 1 for i in range(n)))
-	model.addConstrs((gp.quicksum(x[(i, j)] for i in range(n)) >= math.floor(fairness[j] * n) for j in range(m)))
+	# m fairness constraints, n matching constraints for the viewers
+	A = np.zeros((n*m, m+n))
+	b = np.zeros((m+n,))
+	
+	# first, the fairness constraints, then the matching constraints
+	
+	# fairness constraints
+	for j in range(m):
+		b[j] = -np.floor(fairness[j]*n)
+		for i in range(n):
+			A[i*m + j][j] = -1
+	
+	# viewer-side matching constraints
+	for i in range(n):
+		b[i + m] = 1
+		for j in range(m):
+			A[i*m + j][i + m] = 1
+	
+	res = linprog(obj, A, b, bounds=(0, 1))
+	
+	matching = [-1]*n
+	for i, j in itt.product(list(range(n)), list(range(m))):
+		if res.x[i*m + j] >= 0.9: # just in case the solver gets creative
+			matching[i] = j
 
-	model.setObjective(x.prod(dict_weights), GRB.MAXIMIZE)
-
-	try:
-		model.optimize()
-		
-		matching = [-1]*n
-		for i, j in x.keys():
-			if x[i, j].x == 1:
-				matching[i] = j
-	except x:
-		print("wooooooops", x)
-		exit(0)
-	
 	return matching
