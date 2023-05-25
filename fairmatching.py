@@ -149,13 +149,13 @@ def run_parallel(f, fairness, n, m, N, cpus=-1):
 	return [x[-1] for x in res], ratios, list(tot_demands)
 
 def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):	
-	run_parallel(run_analyze_ocrs_mu, fairness, n, m, N, -1)
+	return run_parallel(run_analyze_ocrs_mu, fairness, n, m, N, -1)
 	
 def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
-	run_parallel(run_analyze_ocrs_opt, fairness, n, m, N, -1)
+	return run_parallel(run_analyze_ocrs_opt, fairness, n, m, N, -1)
 
 def fairness_blind_parallel(fairness, n=100, m=10, N=1000):
-	run_parallel(run_analyze_stupidest, fairness, n, m, N, -1)
+	return run_parallel(run_analyze_stupidest, fairness, n, m, N, -1)
 
 def test():
 	fairness = np.array([0.3, 0.4, 0.1])
