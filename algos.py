@@ -1,7 +1,7 @@
 import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
 import statistics as stats, random, itertools as itt
 from gurobipy import GRB
-import scipy.optimize.linprog as linprog
+import scipy.optimize as sopt
 
 eps = 0.1
 
@@ -226,7 +226,7 @@ def opt(weights, fairness):
 		for j in range(m):
 			A[i*m + j][i + m] = 1
 	
-	res = linprog(obj, A, b, bounds=(0, 1))
+	res = sopt.linprog(obj, A, b, bounds=(0, 1))
 	
 	matching = [-1]*n
 	for i, j in itt.product(list(range(n)), list(range(m))):
