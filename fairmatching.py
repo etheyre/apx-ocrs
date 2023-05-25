@@ -120,6 +120,7 @@ def run_analyze_ocrs_opt(args):
 	s_opt = 1
 	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
+	print(type(s_ocrs), type(fair_ocrs), type(final_demands_ocrs[0]))
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
 
 def run_analyze_stupidest(args):
