@@ -8,7 +8,7 @@ def analyze_log(name):
 	
 	data = []
 
-	for l in data.split("\n"):
+	for l in txt.split("\n"):
 		if l.startswith("res"):
 			data.append(eval(l[3:]))
 	
