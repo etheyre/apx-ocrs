@@ -16,6 +16,7 @@ def analyze_log(name):
 	
 	x = [x[0]*x[1] for x in data] # instance size
 	y = [x[2]/x[3] for x in data] # duration ratio
+	plt.xscale("log")
 	plt.plot(x, y, "o")
 	plt.savefig("plot_" + ".".join(name.split(".")[:-1]))
 
