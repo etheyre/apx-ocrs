@@ -166,11 +166,9 @@ def opt(weights, fairness, b):
 	
 	# viewer-side matching constraints
 	for i in range(n):
-		bv[i + m] = 1
+		bv[i + m] = b
 		for j in range(m):
-			A[i+m][i*m + j] = b
-	
-	print("coefs A", A, "bv", bv)
+			A[i+m][i*m + j] = 1
 	
 	res = sopt.linprog(obj, A, bv, bounds=(0, 1))
 	
