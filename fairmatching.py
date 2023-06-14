@@ -58,7 +58,7 @@ def mu_recompute_fair_matching(inner_state, i, weights_i, b):
 	fairness = inner_state[4]
 	here_weights = np.copy(weights)
 	here_weights[i, :] = weights_i
-	out_state = mu_compute_fair_matching(here_weights, fairness)
+	out_state = mu_compute_fair_matching(here_weights, fairness, b)
 	return out_state[0], out_state
 
 def run_off_alg(distrib, fairness, b, online_weights=None):
