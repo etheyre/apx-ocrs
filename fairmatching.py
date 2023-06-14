@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
+import numpy as np, copy, math, multiprocessing as mp, os, time, datetime
 import statistics as stats, random, itertools as itt
 
 from distribs import *

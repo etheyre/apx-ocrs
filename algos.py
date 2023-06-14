@@ -1,4 +1,5 @@
-import numpy as np, copy, math, gurobipy as gp, multiprocessing as mp, os, time, datetime
+import numpy as np, copy, math, multiprocessing as mp, os, time, datetime
+# gurobipy as gp, 
 import statistics as stats, random, itertools as itt
 from gurobipy import GRB
 import scipy.optimize as sopt
