@@ -170,6 +170,8 @@ def opt(weights, fairness, b):
 		for j in range(m):
 			A[i+m][i*m + j] = b
 	
+	print(A, bv)
+	
 	res = sopt.linprog(obj, A, bv, bounds=(0, 1))
 	
 	print("opt res", res.status)
