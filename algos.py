@@ -154,23 +154,23 @@ def opt(weights, fairness, b):
 	
 	# m fairness constraints, n matching constraints for the viewers
 	A = np.zeros((m+n, n*m))
-	b = np.zeros((m+n,))
+	bv = np.zeros((m+n,))
 	
 	# first, the fairness constraints, then the matching constraints
 	
 	# fairness constraints
 	for j in range(m):
-		b[j] = -np.floor(b*fairness[j]*n)
+		bv[j] = -np.floor(b*fairness[j]*n)
 		for i in range(n):
 			A[j][i*m + j] = -1
 	
 	# viewer-side matching constraints
 	for i in range(n):
-		b[i + m] = 1
+		bv[i + m] = 1
 		for j in range(m):
 			A[i+m][i*m + j] = b
 	
-	res = sopt.linprog(obj, A, b, bounds=(0, 1))
+	res = sopt.linprog(obj, A, bv, bounds=(0, 1))
 	
 	print(res.x)
 	
