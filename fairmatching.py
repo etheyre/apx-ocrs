@@ -65,7 +65,7 @@ def run_off_alg(distrib, fairness, b, online_weights=None):
 	sampled_weights = distrib()
 	online_weights = distrib() if online_weights is None else online_weights
 	matching = ocrs(sampled_weights, online_weights, fairness,
-				    lambda w, f: mu_compute_fair_matching(w, f, b), lambda w, f: mu_recompute_fair_matching(w, f, b))
+				    lambda w, f: mu_compute_fair_matching(w, f, b), lambda state, i, w: mu_recompute_fair_matching(state, i, w, b))
 	return matching, online_weights
 
 def opt_precompute(weights, fairness):
