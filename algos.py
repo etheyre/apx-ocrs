@@ -42,7 +42,7 @@ def lightest_viewer_j(j, matching, rounded_weights):
 def mu_compute_fair_matching(weights, fairness, b):
 	# b is the number of movies per viewer
 	n, m = weights.shape
-	matching = [-1]*n
+	matching = [[] for _ in range(n)]
 	
 	w_max = np.max(weights)
 	scaled_weights = weights * n / (eps * w_max)
