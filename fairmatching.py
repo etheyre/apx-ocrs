@@ -53,7 +53,7 @@ def run_dyn_alg(distrib, fairness, online_weights=None):
 				    mu_compute_fair_matching, mu_update_fair_matching)
 	return matching, online_weights
 
-def mu_recompute_fair_matching(inner_state, i, weights_i):
+def mu_recompute_fair_matching(inner_state, i, weights_i, b):
 	weights = inner_state[1]
 	fairness = inner_state[4]
 	here_weights = np.copy(weights)
@@ -61,11 +61,11 @@ def mu_recompute_fair_matching(inner_state, i, weights_i):
 	out_state = mu_compute_fair_matching(here_weights, fairness)
 	return out_state[0], out_state
 
-def run_off_alg(distrib, fairness, online_weights=None):
+def run_off_alg(distrib, fairness, b, online_weights=None):
 	sampled_weights = distrib()
 	online_weights = distrib() if online_weights is None else online_weights
 	matching = ocrs(sampled_weights, online_weights, fairness,
-				    mu_compute_fair_matching, mu_recompute_fair_matching)
+				    lambda w, f: mu_compute_fair_matching(w, f, b), lambda w, f: mu_recompute_fair_matching(w, f, b))
 	return matching, online_weights
 
 def opt_precompute(weights, fairness):
