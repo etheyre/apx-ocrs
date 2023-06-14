@@ -1,7 +1,7 @@
 import numpy as np, copy, math, multiprocessing as mp, os, time, datetime
 # gurobipy as gp, 
 import statistics as stats, random, itertools as itt
-from gurobipy import GRB
+#from gurobipy import GRB
 import scipy.optimize as sopt
 
 eps = 0.1
