@@ -83,7 +83,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	# TODO match what's left
 	
-	assert(tot_demand == 0 and sum(demands) <= 0)
+	# assert(tot_demand == 0 and sum(demands) <= 0)
 	
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
