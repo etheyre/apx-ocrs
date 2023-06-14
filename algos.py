@@ -38,7 +38,8 @@ def lightest_viewer_j(j, matching, rounded_weights):
 ### The following functions are for the multiplication auction ("mu") algorithm.
 
 # Compute a full fair matching
-def mu_compute_fair_matching(weights, fairness):
+def mu_compute_fair_matching(weights, fairness, b):
+	# b is the number of movies per viewer
 	n, m = weights.shape
 	matching = [-1]*n
 	
@@ -63,24 +64,30 @@ def mu_compute_fair_matching(weights, fairness):
 		# we will take the last element every time
 		Q[i].sort(key=lambda x: x[0])
 	
-	demands = np.floor(fairness * n).astype(int) # fairness needs to be a numpy array
+	demands = np.floor(b * fairness * n).astype(int) # fairness needs to be a numpy array
 	tot_demand = sum(demands)
 	
 	for i in range(n):
-		# number of viewers to come after i
-		viewers_left = n - i - 1
-		
-		tot_demand = mu_match(i, matching, rounded_weights, Q, y,
-						      fairness, demands, viewers_left, tot_demand)
+		for m in range(b):
+			# number of viewers to come after i
+			viewers_left = b*(n - (i+1)) + (m-(b+1))
+			
+			tot_demand = mu_match(i, matching, rounded_weights, Q, y,
+						      fairness, demands, viewers_left, tot_demand, b)
+	
+	if b == 1:
+		for i in range(n):
+			matching[i] = matching[i][0] if len(matching[i]) > 0 else -1
 	
 	# TODO match what's left
+	
 	assert(tot_demand == 0 and sum(demands) <= 0)
-	# TODO WAIT this is exactly the opposite of what I want!!!
-	#assert(all((demands[i] <= np.floor(fairness[i]*n)) for i in range(m)))
+	
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
 # Match i
-def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand):
+def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand, b):
+	assert(len(matching[i]) < b)
 	n, m = rounded_weights.shape
 	
 	while len(Q[i]) != 0:
@@ -88,7 +95,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 		
 		util_ij = rounded_weights[i, j] - y[j]
 		if util_ij >= (1+eps)**k:
-			matching[i] = j
+			matching[i].append(i)
 			demands[j] -= 1
 			if demands[j] >= 0:
 				tot_demand -= 1
@@ -100,15 +107,16 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
+				lightest_viewer_lightest_movie = argmin(matching[lightest_viewer], lambda i, x: x)
 				
-				matching[lightest_viewer] = -1
+				del matching[lightest_viewer][lightest_viewer_lightest_movie]
 				demands[j] += 1
 				if demands[j] > 0:
 					tot_demand += 1
 				
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
-						              fairness, demands, viewers_left, tot_demand)
+						              fairness, demands, viewers_left, tot_demand, b)
 				# TODO here we don't return?
 				return tot_demand
 			else:
@@ -116,78 +124,11 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 	
 	return tot_demand
 
-## The following are update functions for the MU algorithm.
-	
-# This is not used, see next function.
-#def mu_update_delete_edge(inner_state, i, j):
-#	matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min = inner_state
-#	
-#	Q[i] = filter(lambda x: x[1] != j, Q[i])
-#	
-#	if matching[i] == j:
-#		tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
-#		
-#	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
-
-# Remove all the edges from viewer i.
-def mu_update_delete_vertex_edges(inner_state, i):
-	""" Remark that if we call mu_update_delete_edge for all j (and fixed i) in sequence, we will
-	enter the if exactly one, for j' such that i is matched to j'. Thus imagine we do this sequence of
-	calls by calling with j' at the end. When we enter the if, Q[i] is empty, so mu_match returns
-	without doing anything. Thus there is no work to do to remove all the edges of a vertex, just some
-	bookkeeping. """
-	
-	matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min = inner_state
-	n, m = rounded_weights.shape
-	
-	Q[i] = []
-	match_i = matching[i]
-	if match_i != -1:
-		matching[i] = -1
-		# TODO that's not how it works anymore
-		if demands[match_i] < math.floor(fairness[match_i] * n):
-			demands[match_i] += 1
-			tot_demand += 1
-		
-	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
-
-# Add a viewer i and all its weights, and update.
-def mu_update_add_vertex(inner_state, i, viewer_weights):
-	matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min = inner_state
-	n, m = rounded_weights.shape
-	
-	rounded_weights[i, :] = (1+eps)**ilog(viewer_weights)
-	
-	Q[i] = []
-	
-	for j in range(m):
-		for k in range(-k_min, ilog(rounded_weights[i, j]) + 1):
-			Q[i].append((k, j))
-	
-	Q[i].sort(key=lambda x: x[0])
-	
-#	print("let's match!", i)
-	tot_demand = mu_match(i, matching, rounded_weights, Q, y, fairness, demands, 0, tot_demand)
-	
-#	print(i, "matched to", matching[i])
-	
-	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
-
-# Update the matching.
-def mu_update_fair_matching(inner_state, i, viewer_weights):
-	# when we update, viewers_left == 0
-	
-	# Here, we can copy the inner_state if we want to have no correlation
-	inner_state = mu_update_delete_vertex_edges(inner_state, i)
-#	print("upd_fm_edges", inner_state[0])
-	inner_state = mu_update_add_vertex(inner_state, i, viewer_weights)
-	
-	return inner_state[0], inner_state # the matching and the inner state
-
+# The update functions for the mu algorithm are now obsolete.
 
 ### To compute the optimum
 	
-def opt(weights, fairness):
+def opt(weights, fairness, b):
 	n, m = weights.shape
 	
 #	env = gp.Env(empty=True)
@@ -216,7 +157,7 @@ def opt(weights, fairness):
 	
 	# fairness constraints
 	for j in range(m):
-		b[j] = -np.floor(fairness[j]*n)
+		b[j] = -np.floor(b*fairness[j]*n)
 		for i in range(n):
 			A[j][i*m + j] = -1
 	
@@ -224,13 +165,19 @@ def opt(weights, fairness):
 	for i in range(n):
 		b[i + m] = 1
 		for j in range(m):
-			A[i+m][i*m + j] = 1
+			A[i+m][i*m + j] = b
 	
 	res = sopt.linprog(obj, A, b, bounds=(0, 1))
 	
-	matching = [-1]*n
+	print(res.x)
+	
+	matching = [[] for _ in range(n)]
 	for i, j in itt.product(list(range(n)), list(range(m))):
 		if res.x[i*m + j] >= 0.9: # just in case the solver gets creative
-			matching[i] = j
+			matching[i].append(j)
+	
+	if b == 1:
+		for i in range(n):
+			matching[i] = matching[i][0] if len(matching[i]) > 0 else -1
 
 	return matching

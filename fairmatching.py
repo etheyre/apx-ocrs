@@ -103,12 +103,12 @@ def run_ocrs_stupidest_algo(distrib, fairness, online_weights=None):
 
 
 def run_analyze_ocrs_mu(args):
-	n, m, fairness = args
+	n, m, fairness, b = args
 	start = time.time()
-	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness)
-	#m_opt = opt(weights, fairness)
+	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness, b)
+	m_opt = opt(weights, fairness, b)
 	s_opt = 1
-	#s_opt, _, _ = score_matching(m_opt, fairness, weights)
+	s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
 
@@ -132,20 +132,20 @@ def run_analyze_stupidest(args):
 
 
 
-def run_parallel(f, fairness, n, m, N, cpus=-1):
+def run_parallel(f, fairness, n, m, b, N, cpus=-1):
 	print("starting on", os.cpu_count(), "glorious CPUs")
 	t = time.time()
 	if cpus == -1:
 		cpus = os.cpu_count()
 	with mp.Pool() as p:
-		res = p.map(f, [(n, m, fairness)]*N)
+		res = p.map(f, [(n, m, fairness, b)]*N)
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
 	
 	tot_demands = sum([np.array(x[3]) for x in res])/N
 	ratios = [x[1] for x in res]
-#	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
-#	print(tot_demands)
+	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
+	print(tot_demands)
 	return [x[-1] for x in res], ratios, list(tot_demands)
 
 def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):	
@@ -179,9 +179,6 @@ def test():
 	assert(fair_alg == 0 and fair_opt == 0)
 	assert(s_alg <= (1+eps) * s_opt)
 
-def avg(l):
-	return sum(l)/len(l)
-
 def compare_running_times():
 	N = 50
 	time_data = []
@@ -201,7 +198,14 @@ def compare_running_times():
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
 
-compare_running_times()
+n = 1000
+m = 10
+b = 3
+fairness = np.array([1/(m+1)]*m)
+times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
+print(times_mu, ratios_mu, avg_leftover_mu)
+
+#compare_running_times()
 #test()
 #fairness_ocrs_mu_parallel()
 #run_stupidest_parallel()
