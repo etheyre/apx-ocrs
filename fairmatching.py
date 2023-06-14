@@ -204,7 +204,7 @@ b = 1
 N = 20
 fairness = np.array([1/(m+1)]*m)
 times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
-print(ratios_mu)
+print("results", ratios_mu)
 
 #compare_running_times()
 #test()
