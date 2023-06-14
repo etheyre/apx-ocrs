@@ -198,8 +198,8 @@ def compare_running_times():
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
 
-n = 1000
-m = 10
+n = 10
+m = 2
 b = 3
 N = 20
 fairness = np.array([1/(m+1)]*m)

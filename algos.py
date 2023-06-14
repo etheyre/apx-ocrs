@@ -70,7 +70,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	for i in range(n):
 		for m in range(b):
-			print("fill", i)
+			print("fill", i, matching)
 			# number of viewers to come after i
 			viewers_left = b*(n - (i+1)) + (m-(b+1))
 			
