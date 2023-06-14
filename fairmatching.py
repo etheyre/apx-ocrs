@@ -148,8 +148,8 @@ def run_parallel(f, fairness, n, m, b, N, cpus=-1):
 	print(tot_demands)
 	return [x[-1] for x in res], ratios, list(tot_demands)
 
-def fairness_ocrs_mu_parallel(fairness, n=100, m=10, N=1000):	
-	return run_parallel(run_analyze_ocrs_mu, fairness, n, m, N, -1)
+def fairness_ocrs_mu_parallel(fairness, n=100, m=10, b=1, N=1000):	
+	return run_parallel(run_analyze_ocrs_mu, fairness, n, m, b, N, -1)
 	
 def fairness_ocrs_opt_parallel(fairness, n=100, m=10, N=1000):
 	return run_parallel(run_analyze_ocrs_opt, fairness, n, m, N, -1)
