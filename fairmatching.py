@@ -15,11 +15,14 @@ def score_matching(matching, fairness, weights):
 	demands = np.floor(fairness * n)
 	
 	for i in range(n):
-		j = matching[i]
-		if j == -1:
-			continue
-		matching_weight += weights[i, j]
-		demands[j] -= 1
+		x = matching[i]
+		if type(x) is not list:
+			if x == -1:
+				continue
+			x = [x]
+		for j in x:
+			matching_weight += weights[i, j]
+			demands[j] -= 1
 	
 	# demands is fairness - loads
 	
