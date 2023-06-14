@@ -96,7 +96,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 		
 		util_ij = rounded_weights[i, j] - y[j]
 		if util_ij >= (1+eps)**k:
-			matching[i].append(i)
+			matching[i].append(j)
 			demands[j] -= 1
 			if demands[j] >= 0:
 				tot_demand -= 1
@@ -108,7 +108,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
-				lightest_viewer_lightest_movie = argmin(matching[lightest_viewer], lambda i, x: x)
+				lightest_viewer_lightest_movie = argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
 				
 				del matching[lightest_viewer][lightest_viewer_lightest_movie]
 				demands[j] += 1
