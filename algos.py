@@ -27,10 +27,10 @@ def lightest_viewer_j(j, matching, rounded_weights):
 	curr_min = None
 	curr_idx = None
 	
-	for i, x in enumerate(matching):
+	for i in range(len(matching)):
 		v = rounded_weights[i, j]
 		
-		if (curr_min is None or v < curr_min) and j in x:
+		if (curr_min is None or v < curr_min) and j in matching[i]:
 			curr_min = v
 			curr_idx = i
 	
