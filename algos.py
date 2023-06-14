@@ -172,7 +172,7 @@ def opt(weights, fairness, b):
 	
 	res = sopt.linprog(obj, A, bv, bounds=(0, 1))
 	
-	print("opt res", res.x)
+	print("opt res", res.status)
 	
 	matching = [[] for _ in range(n)]
 	for i, j in itt.product(list(range(n)), list(range(m))):
