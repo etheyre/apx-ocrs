@@ -58,7 +58,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	for i in range(n):
 		for j in range(m):
-			Q[i] = ilog(scaled_weights[i, j])
+			Q[i][j] = ilog(scaled_weights[i, j])
 	
 	demands = np.floor(b * fairness * n).astype(int) # fairness needs to be a numpy array
 	tot_demand = sum(demands)
