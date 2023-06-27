@@ -203,12 +203,16 @@ def compare_running_times():
 
 n = 100
 m = 10
-b = 3
+b = 1
 # makes more sense when b < m
-N = 1 # for testing
+N = 100 # for testing
 fairness = np.array([1/(m+1)]*m)
 times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
 print("results", ratios_mu)
+
+for r in ratios_mu:
+	if eps < 1-r:
+		print("eps violated")
 
 #compare_running_times()
 #test()
