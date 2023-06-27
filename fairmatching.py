@@ -109,6 +109,8 @@ def run_analyze_ocrs_mu(args):
 	n, m, fairness, b = args
 	start = time.time()
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness, b)
+	if b > 1:
+		assert(all((len(set(m_ocrs[i])) == len(m_ocrs[i]) for i in range(n))
 	m_opt = opt(weights, fairness, b)
 	# print("res", m_ocrs, m_opt)
 	s_opt, _, _ = score_matching(m_opt, fairness, weights)
@@ -203,7 +205,7 @@ def compare_running_times():
 
 n = 100
 m = 10
-b = 1
+b = 3
 # makes more sense when b < m
 N = 100 # for testing
 fairness = np.array([1/(m+1)]*m)
