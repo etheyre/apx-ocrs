@@ -205,7 +205,7 @@ def compare_running_times():
 
 n = 100
 m = 10
-b = 3
+b = 1
 # makes more sense when b < m
 N = 100 # for testing
 fairness = np.array([1/(m+1)]*m)
