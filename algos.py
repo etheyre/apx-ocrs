@@ -98,7 +98,7 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
 	
 	val = Q[i][curr_best_movie]
 	Q[i][curr_best_movie] -= 1
-	return curr_best_movie, val
+	return val, curr_best_movie
 
 # Match i
 def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand, b, k_min):
