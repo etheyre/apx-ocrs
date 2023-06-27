@@ -89,7 +89,7 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
 	for j in range(m):
 		if j in curr_movies:
 			continue
-		print(i, j, curr_best_movie, len(Q[i]))
+			
 		if (curr_best_movie == -1 or Q[i][j] > Q[i][curr_best_movie]) and Q[i][curr_best_movie] >= -k_min:
 			curr_best_movie = j
 
@@ -134,7 +134,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
 				#print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
-						              fairness, demands, viewers_left, tot_demand, b)
+						              fairness, demands, viewers_left, tot_demand, b, k_min)
 				# TODO here we don't return?
 				return tot_demand
 			else:
