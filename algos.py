@@ -89,6 +89,7 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
 	for j in range(m):
 		if j in curr_movies:
 			continue
+		print(i, j, curr_best_movie, len(Q[i]))
 		if (curr_best_movie == -1 or Q[i][j] > Q[i][curr_best_movie]) and Q[i][curr_best_movie] >= -k_min:
 			curr_best_movie = Q[i][j]
 
