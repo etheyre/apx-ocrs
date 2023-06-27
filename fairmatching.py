@@ -110,7 +110,7 @@ def run_analyze_ocrs_mu(args):
 	start = time.time()
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness, b)
 	m_opt = opt(weights, fairness, b)
-	print("res", m_ocrs, m_opt)
+	# print("res", m_ocrs, m_opt)
 	s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
@@ -147,8 +147,8 @@ def run_parallel(f, fairness, n, m, b, N, cpus=-1):
 	
 	tot_demands = sum([np.array(x[3]) for x in res])/N
 	ratios = [x[1] for x in res]
-	print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
-	print(tot_demands)
+	# print(min(ratios), max(ratios), sum(ratios)/N, stats.variance(ratios), stats.quantiles(ratios))
+	# print(tot_demands)
 	return [x[-1] for x in res], ratios, list(tot_demands)
 
 def fairness_ocrs_mu_parallel(fairness, n=100, m=10, b=1, N=1000):	
