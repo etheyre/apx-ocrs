@@ -140,7 +140,7 @@ def run_parallel(f, fairness, n, m, b, N, cpus=-1):
 	t = time.time()
 	if cpus == -1:
 		cpus = os.cpu_count()
-	with mp.Pool() as p:
+	with mp.Pool(cpus) as p:
 		res = p.map(f, [(n, m, fairness, b)]*N)
 	
 	print("took", str(datetime.timedelta(seconds=time.time()-t)))
