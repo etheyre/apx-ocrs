@@ -210,9 +210,7 @@ fairness = np.array([1/(m+1)]*m)
 times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
 print("results", ratios_mu)
 
-for r in ratios_mu:
-	if eps < 1-r:
-		print("eps violated")
+print(sum((eps < 1-r for r in ratios_mu)), "eps violations")
 
 #compare_running_times()
 #test()
