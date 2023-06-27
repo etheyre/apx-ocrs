@@ -4,7 +4,7 @@ import statistics as stats, random, itertools as itt
 #from gurobipy import GRB
 import scipy.optimize as sopt
 
-eps = 0.01
+eps = 0.1
 
 def ilog(x):
 	return np.floor(np.log2(x)/np.log2(1+eps)).astype(int)
