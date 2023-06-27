@@ -47,7 +47,6 @@ def mu_compute_fair_matching(weights, fairness, b):
 	w_max = np.max(weights)
 	scaled_weights = weights * n / (eps * w_max)
 	
-	# TODO k_max could change with an update...?
 	k_max = ilog(w_max)
 	k_min = math.ceil(-ilog(eps))
 	
