@@ -52,7 +52,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	rounded_weights = (1+eps)**ilog(scaled_weights)
 	
-	Q = [[] for i in range(n)]
+	Q = [[0]*m for i in range(n)]
 	
 	y = np.zeros((m,))
 	
