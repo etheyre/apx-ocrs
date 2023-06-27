@@ -132,7 +132,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 					tot_demand += 1
 				
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
-				#print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
+				print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
 						              fairness, demands, viewers_left, tot_demand, b, k_min)
 				# TODO here we don't return?
