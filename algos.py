@@ -22,12 +22,13 @@ def argmin(l, f):
 			
 	return curr_idx
 
-def lightest_viewer_j(j, matching, rounded_weights):
-	# warning: explodes if the list l is empty
+def lightest_viewer_j(j, curr_i, matching, rounded_weights):
 	curr_min = None
 	curr_idx = None
 	
 	for i in range(len(matching)):
+		if i == curr_i:
+			continue
 		v = rounded_weights[i, j]
 		
 		if (curr_min is None or v < curr_min) and j in matching[i]:
@@ -123,7 +124,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 			if tot_demand > viewers_left:
 				# feasibility problem
 				# find lightest edge to j
-				lightest_viewer = lightest_viewer_j(j, matching, rounded_weights)
+				lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
 				lightest_viewer_lightest_movie = argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
 				
 				del matching[lightest_viewer][lightest_viewer_lightest_movie]
