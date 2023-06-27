@@ -110,7 +110,6 @@ def run_analyze_ocrs_mu(args):
 	start = time.time()
 	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness, b)
 	m_opt = opt(weights, fairness, b)
-	s_opt = 1
 	s_opt, _, _ = score_matching(m_opt, fairness, weights)
 	s_ocrs, fair_ocrs, final_demands_ocrs = score_matching(m_ocrs, fairness, weights)
 	return (s_ocrs, s_ocrs/s_opt, fair_ocrs, list(final_demands_ocrs), time.time()-start)
