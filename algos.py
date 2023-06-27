@@ -65,7 +65,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	for i in range(n):
 		for m in range(b):
-			print("fill", i, matching)
+			#print("fill", i, matching)
 			# number of viewers to come after i
 			viewers_left = b*(n - (i+1)) + (m+1-b)
 			
@@ -131,7 +131,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 					tot_demand += 1
 				
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
-				print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
+				#print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
 						              fairness, demands, viewers_left, tot_demand, b)
 				# TODO here we don't return?
