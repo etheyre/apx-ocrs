@@ -80,7 +80,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	
 	# TODO match what's left
 	# assert(tot_demand == 0 and sum(demands) <= 0)
-	
+	print("matching", matching)
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
 def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
