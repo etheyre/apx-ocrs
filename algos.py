@@ -108,7 +108,7 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m, Qold):
 	if curr_best_movie == -1: # no more movies, at least outside curr_movies
 		return -1, -1
 
-	if len(Qold[i]) = 0:
+	if len(Qold[i]) == 0:
 		return -1, -1
 	else:
 		(k, j) = Qold[i].pop()
