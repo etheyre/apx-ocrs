@@ -61,6 +61,16 @@ def mu_compute_fair_matching(weights, fairness, b):
 	for i in range(n):
 		for j in range(m):
 			Q[i][j] = ilog(scaled_weights[i, j])
+
+	Qold = [[] for i in range(n)]
+	
+	for i in range(n):
+		for j in range(m):
+			for k in range(-k_min, ilog(scaled_weights[i, j])+1):
+				Qold[i].append((k, j))
+	for i in range(n):
+		# we will take the last element every time
+		Qold[i].sort(key=lambda x: x[0])
 	
 	demands = np.floor(b * fairness * n).astype(int) # fairness needs to be a numpy array
 	tot_demand = sum(demands)
@@ -72,7 +82,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 			viewers_left = b*(n - (i+1)) + (m+1-b)
 			
 			tot_demand = mu_match(i, matching, rounded_weights, Q, y,
-						      fairness, demands, viewers_left, tot_demand, b, k_min)
+						      fairness, demands, viewers_left, tot_demand, b, k_min, Qold)
 	
 	if b == 1:
 		for i in range(n):
@@ -83,7 +93,7 @@ def mu_compute_fair_matching(weights, fairness, b):
 	print("matching", matching)
 	return (matching, rounded_weights, Q, y, fairness, demands, tot_demand, w_max, k_max, k_min)
 
-def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
+def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m, Qold):
 	""" returns the next movie to be considered, along with its current "value",
  	while ignoring movies in curr_movies, already assigned to viewer i """
 
@@ -97,18 +107,22 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m):
 	
 	if curr_best_movie == -1: # no more movies, at least outside curr_movies
 		return -1, -1
+
+	(k, j) = Qold[i].pop()
+	if i == 5:
+		print("pop", curr_best_movie, Q[i][curr_best_movie], j, k)
 	
 	val = Q[i][curr_best_movie]
 	Q[i][curr_best_movie] -= 1
 	return val, curr_best_movie
 
 # Match i
-def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand, b, k_min):
+def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left, tot_demand, b, k_min, Qold):
 	assert(len(matching[i]) < b)
 	n, m = rounded_weights.shape
 	
 	while True: # end condition is just below
-		(k, j) = pop_next_movie_for_viewer(Q, i, matching[i], k_min, m)
+		(k, j) = pop_next_movie_for_viewer(Q, i, matching[i], k_min, m, Qold)
 		if k == -1:
 			break
 		
@@ -138,7 +152,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
 				#print("rematch ", lightest_viewer, len(matching[lightest_viewer]), len(Q[lightest_viewer]))
 				tot_demand = mu_match(lightest_viewer, matching, rounded_weights, Q, y,
-						              fairness, demands, viewers_left, tot_demand, b, k_min)
+						              fairness, demands, viewers_left, tot_demand, b, k_min, Qold)
 				# TODO here we don't return?
 				return tot_demand
 			else:
