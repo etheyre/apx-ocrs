@@ -203,7 +203,7 @@ def compare_running_times():
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
 
-n = 100
+n = 40
 m = 10
 b = 1
 # makes more sense when b < m
