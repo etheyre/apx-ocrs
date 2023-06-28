@@ -207,7 +207,7 @@ n = 100
 m = 10
 b = 1
 # makes more sense when b < m
-N = 100 # for testing
+N = 1 # for testing
 fairness = np.array([1/(m+1)]*m)
 times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
 print("results", ratios_mu)
