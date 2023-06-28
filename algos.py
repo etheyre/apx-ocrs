@@ -41,6 +41,7 @@ def lightest_viewer_j(j, curr_i, matching, rounded_weights):
 
 # Compute a full fair matching
 def mu_compute_fair_matching(weights, fairness, b):
+	print("go")
 	# b is the number of movies per viewer
 	n, m = weights.shape
 	matching = [[] for _ in range(n)]
