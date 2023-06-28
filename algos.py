@@ -108,9 +108,13 @@ def pop_next_movie_for_viewer(Q, i, curr_movies, k_min, m, Qold):
 	if curr_best_movie == -1: # no more movies, at least outside curr_movies
 		return -1, -1
 
-	(k, j) = Qold[i].pop()
-	if i == 5:
-		print("pop", curr_best_movie, Q[i][curr_best_movie], j, k)
+	if len(Qold[i]) = 0:
+		return -1, -1
+	else:
+		(k, j) = Qold[i].pop()
+		if i == 5:
+			print("pop", curr_best_movie, Q[i][curr_best_movie], j, k)
+		return k, j
 	
 	val = Q[i][curr_best_movie]
 	Q[i][curr_best_movie] -= 1
