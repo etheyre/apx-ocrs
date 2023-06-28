@@ -147,7 +147,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
 				# TODO is this really what we want to do? We should maybe remove j? Otherwise, what is the point of looking
 				# for the lightest viewer assigned to movie j??
-				lightest_viewer_lightest_movie = argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
+				lightest_viewer_lightest_movie = j #argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
 				
 				del matching[lightest_viewer][lightest_viewer_lightest_movie]
 				demands[j] += 1
