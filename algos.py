@@ -138,7 +138,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 			if demands[j] >= 0:
 				tot_demand -= 1
 			
-			if (tot_demand > viewers_left and False) or demands[j] == 0: # TODO investigate
+			if tot_demand > viewers_left or demands[j] == 0: # TODO investigate
 				y[j] += eps * util_ij
 			
 			if tot_demand > viewers_left:
