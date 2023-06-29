@@ -182,10 +182,11 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# TODO is this really what we want to do? We should maybe remove j? Otherwise, what is the point of looking
 				# for the lightest viewer assigned to movie j??
 				# lightest_viewer_lightest_slot = matching[lightest_viewer].index(j) #argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
-				
+
+				removed_movie = matching[lightest_viewer][lightest_viewer_lightest_slot]
 				del matching[lightest_viewer][lightest_viewer_lightest_slot]
-				demands[j] += 1
-				if demands[j] > 0:
+				demands[removed_movie] += 1
+				if demands[removed_movie] > 0:
 					tot_demand += 1
 				
 #				print("rec match", lightest_viewer, len(Q[lightest_viewer]))
