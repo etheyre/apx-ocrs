@@ -27,7 +27,7 @@ def lightest_viewer_j(j, curr_i, matching, rounded_weights):
 	curr_idx = None
 	
 	for i in range(len(matching)):
-		if i == curr_i and False:
+		if i == curr_i:
 			continue
 		v = rounded_weights[i, j]
 		
