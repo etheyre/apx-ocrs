@@ -49,7 +49,6 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 	curr_min = None
 	curr_idx = None
 	curr_movie = None
-	print("loads", compute_loads(n, m, matching), [math.floor(b*n*fairness[i])-x for i, x in enumerate(demands)])
 
 	oversatisfied_movies = set([i for i, x in enumerate(demands) if x < 0])
 	print("oversat", oversatisfied_movies)
@@ -175,6 +174,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				# lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
+				print("state", tot_demand, viewers_left, sum(demands))
 				lightest_viewer, lightest_viewer_lightest_slot = make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights)
 				if lightest_viewer is None:
 					print(j, i, matching)
