@@ -48,18 +48,21 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 	# return the smallest edge among the edges going to movies that are more than satisfied
 	curr_min = None
 	curr_idx = None
+	curr_movie = None
 
 	oversatisfied_movies = set([i for i, x in enumerate(compute_loads(n, m, matching)) if x > b*n*fairness[i]])
 	print("oversat", oversatisfied_movies)
 	
 	for i in range(len(matching)):
-		v = rounded_weights[i, j]
+		for j in oversatisfied_movies.intersection(set(matching[i])):
+			v = rounded_weights[i, j]
 		
-		if (curr_min is None or v < curr_min) and len(oversatisfied_movies.intersection(set(matching[i]))) > 0:
-			curr_min = v
-			curr_idx = i
+			if (curr_min is None or v < curr_min):
+				curr_min = v
+				curr_idx = i
+				curr_movie = j
 	
-	return curr_idx
+	return curr_idx, matching[i].index(curr_movie)
 
 ### The following functions are for the multiplication auction ("mu") algorithm.
 
@@ -169,15 +172,15 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				# lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
-				lightest_viewer = make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights)
+				lightest_viewer, lightest_viewer_lightest_slot = make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights)
 				if lightest_viewer is None:
 					print(j, i, matching)
 					assert(False)
 				# TODO is this really what we want to do? We should maybe remove j? Otherwise, what is the point of looking
 				# for the lightest viewer assigned to movie j??
-				lightest_viewer_lightest_movie = matching[lightest_viewer].index(j) #argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
+				# lightest_viewer_lightest_slot = matching[lightest_viewer].index(j) #argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
 				
-				del matching[lightest_viewer][lightest_viewer_lightest_movie]
+				del matching[lightest_viewer][lightest_viewer_lightest_slot]
 				demands[j] += 1
 				if demands[j] > 0:
 					tot_demand += 1
