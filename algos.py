@@ -37,6 +37,28 @@ def lightest_viewer_j(j, curr_i, matching, rounded_weights):
 	
 	return curr_idx
 
+def compute_loads(n, m, matching):
+	loads = [0]*m
+	for x in matching:
+		loads[x] += 1
+	return loads
+
+def make_some_space(n, m, i, j, matching, demands, fairness, y, rounded_weights):
+	# return the smallest edge among the edges going to movies that are more than satisfied
+	curr_min = None
+	curr_idx = None
+
+	oversatisfied_movies = set([x for i, x in enumnerate(compute_loads(n, m, matching)) if x > fairness[i]])
+	
+	for i in range(len(matching)):
+		v = rounded_weights[i, j]
+		
+		if (curr_min is None or v < curr_min) and len(oversatisfied_movies.insersection(set(matching[i]))) > 0:
+			curr_min = v
+			curr_idx = i
+	
+	return curr_idx
+
 ### The following functions are for the multiplication auction ("mu") algorithm.
 
 # Compute a full fair matching
@@ -144,7 +166,8 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 			if tot_demand > viewers_left:
 				# feasibility problem
 				# find lightest edge to j
-				lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
+				# lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
+				lightest_viewer = make_some_space(n, m, i, j, matching, demands, fairness, y, rounded_weights)
 				if lightest_viewer is None:
 					print(j, i, matching)
 					assert(False)
