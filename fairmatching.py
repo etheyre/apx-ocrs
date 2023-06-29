@@ -108,7 +108,7 @@ def run_ocrs_stupidest_algo(distrib, fairness, online_weights=None):
 def run_analyze_ocrs_mu(args):
 	n, m, fairness, b = args
 	start = time.time()
-	m_ocrs, weights = run_off_alg(lambda: unif_distrib(n, m), fairness, b)
+	m_ocrs, weights = run_off_alg(lambda: blockbuster_distrib(n, m), fairness, b)
 	if b > 1:
 		assert(all(len(set(m_ocrs[i])) == len(m_ocrs[i]) for i in range(n)))
 	m_opt = opt(weights, fairness, b)
@@ -209,6 +209,7 @@ b = 1
 # makes more sense when b < m
 N = 1 # for testing
 fairness = np.array([1/(m+1)]*m)
+fairness = np.array([2**(j-m) for j in range(m)])
 times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
 print("results", ratios_mu)
 
