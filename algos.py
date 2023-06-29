@@ -145,6 +145,9 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
+				if lightest_viewer is None:
+					print(j, i, matching)
+					assert(False)
 				# TODO is this really what we want to do? We should maybe remove j? Otherwise, what is the point of looking
 				# for the lightest viewer assigned to movie j??
 				lightest_viewer_lightest_movie = matching[lightest_viewer].index(j) #argmin(matching[lightest_viewer], lambda i, x: rounded_weights[lightest_viewer, x])
