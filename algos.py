@@ -49,6 +49,7 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 	curr_min = None
 	curr_idx = None
 	curr_movie = None
+	print("loads", compute_loads(n, m, matching), demands)
 
 	oversatisfied_movies = set([i for i, x in enumerate(demands) if x < 0])
 	print("oversat", oversatisfied_movies)
