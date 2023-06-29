@@ -52,7 +52,7 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 
 	oversatisfied_movies = set([i for i, x in enumerate(compute_loads(n, m, matching)) if x > math.floor(b*n*fairness[i])])
 	print("oversat", oversatisfied_movies)
-	print(demands)
+	print(demands, compute_loads(n, m, matching)[0], math.floor(b*n*fairness[0]))
 	assert(len(oversatisfied_movies) != 0) # because we call this when there is a global infeasibility
 	
 	for i in range(len(matching)):
