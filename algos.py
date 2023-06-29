@@ -174,7 +174,8 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				# lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
-				print("state", tot_demand, viewers_left, sum(demands))
+				# we might get here while no movie is oversatisfied, for instance if there were many viewers dropped before. This is a problem, because make_some_space needs that.
+				print(matching, i)
 				lightest_viewer, lightest_viewer_lightest_slot = make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights)
 				if lightest_viewer is None:
 					print(j, i, matching)
