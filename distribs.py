@@ -28,6 +28,15 @@ def liked_distrib(n, m):
 	
 	return weights
 
+def blockbuster_distrib(n, m):
+	rng = np.random.default_rng()
+	weights = np.zeros((n, m))
+	for j in range(m):
+		for i in range(n):
+			weights[i, j] = rng.random()*(1-1/(m-j))
+	return weights
+
+
 
 # This is the MovieLens stuff. It's not used for now. Also, it probably doesn't work.
 
