@@ -41,7 +41,7 @@ def compute_loads(n, m, matching):
 	loads = [0]*m
 	for x in matching:
 		for y in x:
-			loads[x] += 1
+			loads[y] += 1
 	return loads
 
 def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights):
