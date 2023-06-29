@@ -40,15 +40,16 @@ def lightest_viewer_j(j, curr_i, matching, rounded_weights):
 def compute_loads(n, m, matching):
 	loads = [0]*m
 	for x in matching:
-		loads[x] += 1
+		for y in x:
+			loads[x] += 1
 	return loads
 
-def make_some_space(n, m, i, j, matching, demands, fairness, y, rounded_weights):
+def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights):
 	# return the smallest edge among the edges going to movies that are more than satisfied
 	curr_min = None
 	curr_idx = None
 
-	oversatisfied_movies = set([x for i, x in enumerate(compute_loads(n, m, matching)) if x > fairness[i]])
+	oversatisfied_movies = set([x for i, x in enumerate(compute_loads(n, m, matching)) if x > b*n*fairness[i]])
 	
 	for i in range(len(matching)):
 		v = rounded_weights[i, j]
@@ -167,7 +168,7 @@ def mu_match(i, matching, rounded_weights, Q, y, fairness, demands, viewers_left
 				# feasibility problem
 				# find lightest edge to j
 				# lightest_viewer = lightest_viewer_j(j, i, matching, rounded_weights)
-				lightest_viewer = make_some_space(n, m, i, j, matching, demands, fairness, y, rounded_weights)
+				lightest_viewer = make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weights)
 				if lightest_viewer is None:
 					print(j, i, matching)
 					assert(False)
