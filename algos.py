@@ -54,7 +54,7 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 	for i in range(len(matching)):
 		v = rounded_weights[i, j]
 		
-		if (curr_min is None or v < curr_min) and len(oversatisfied_movies.insersection(set(matching[i]))) > 0:
+		if (curr_min is None or v < curr_min) and len(oversatisfied_movies.intersection(set(matching[i]))) > 0:
 			curr_min = v
 			curr_idx = i
 	
