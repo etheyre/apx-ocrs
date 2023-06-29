@@ -62,7 +62,7 @@ def make_some_space(n, m, i, j, matching, demands, b, fairness, y, rounded_weigh
 				curr_idx = i
 				curr_movie = j
 	
-	return curr_idx, matching[i].index(curr_movie)
+	return curr_idx, matching[curr_idx].index(curr_movie)
 
 ### The following functions are for the multiplication auction ("mu") algorithm.
 
