@@ -256,3 +256,53 @@ def opt(weights, fairness, b):
 			matching[i] = matching[i][0] if len(matching[i]) > 0 else -1
 
 	return matching
+
+
+# opt with multiple fairness constraints
+# fair_constraints is a list of pairs of lists, the first list of the pair being
+# a list of sets (describing a partition of [n]), and the second list being a
+# list of floats (the fairness for each set of the partition).
+def opt_groups(weights, fair_constraints, b):
+	n, m = weights.shape
+	
+	obj = -weights.flatten()
+	# obj[i*m + j] is -weights[i, j]
+    
+    # we count the number of fairness constraints on sets
+	n_fairness_cnts = sum((len(l) for (l, _) in fair_constraints))
+	
+	# m fairness constraints, n matching constraints for the viewers
+	A = np.zeros((n_fairness_cnts+n, n*m))
+	bv = np.zeros((n_fairness_cnts+n,))
+	
+	# first, the fairness constraints, then the matching constraints
+	
+	# fairness constraints
+	ctr = 0
+	for p in fair_constraints:
+		l_sets, l_fairnesses = p
+		for s, f in zip(l_sets, l_fairnesses):
+			bv[ctr] = -np.floor(b*f*n)
+			for j in s:
+				for i in range(n):
+					A[ctr][i*m+j] = -1
+			ctr += 1
+	assert(ctr == n_fairness_cnts)
+	# viewer-side matching constraints
+	for i in range(n):
+		bv[i + n_fairness_cnts] = b
+		for j in range(m):
+			A[i+n_fairness_cnts][i*m + j] = 1
+	
+	res = sopt.linprog(obj, A, bv, bounds=(0, 1))
+	#print("lp opt", res.message)
+	matching = [[] for _ in range(n)]
+	for i, j in itt.product(list(range(n)), list(range(m))):
+		if res.x[i*m + j] >= 0.9: # just in case the solver gets creative
+			matching[i].append(j)
+	
+	if b == 1:
+		for i in range(n):
+			matching[i] = matching[i][0] if len(matching[i]) > 0 else -1
+
+	return matching

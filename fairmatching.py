@@ -203,17 +203,17 @@ def compare_running_times():
 	with open("times.dat", "w") as f:
 		f.write(str(time_data))
 
-n = 40
-m = 10
-b = 1
-# makes more sense when b < m
-N = 1 # for testing
-fairness = np.array([1/(m+1)]*m)
-fairness = np.array([2**(j-m) for j in range(m)])
-times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
-print("results", ratios_mu)
+# n = 40
+# m = 10
+# b = 1
+# # makes more sense when b < m
+# N = 1 # for testing
+# fairness = np.array([1/(m+1)]*m)
+# fairness = np.array([2**(j-m) for j in range(m)])
+# times_mu, ratios_mu, avg_leftover_mu = fairness_ocrs_mu_parallel(fairness, n, m, b, N)
+# print("results", ratios_mu)
 
-print(sum((eps < 1-r for r in ratios_mu)), "eps violations")
+# print(sum((eps < 1-r for r in ratios_mu)), "eps violations")
 
 #compare_running_times()
 #test()
@@ -221,3 +221,46 @@ print(sum((eps < 1-r for r in ratios_mu)), "eps violations")
 #run_stupidest_parallel()
 #fairness_ocrs_mu()
 #fairness_ocrs_opt()
+
+n = 400
+m = 10
+b = 1
+fairness_cnts = [([[1, 2, 4, 5], [0, 3, 6, 7, 8, 9]], [0.1, 0.4]),
+                 ([[0, 4, 8, 6, 1, 2], [3, 5, 7, 9]], [0.7, 0.2])]
+results = []
+cells = []
+
+for i1 in range(len(fairness_cnts)):
+	for i2 in range(i1):
+		for c1 in fairness_cnts[i1][0]:
+			for c2 in fairness_cnts[i2][0]:
+				cells.append(set(c1).intersection(c2))
+
+nc = len(cells)
+
+for _ in range(300):
+	weights = unif_distrib(n, m)
+	matching = opt_groups(weights, fairness_cnts, b)
+	
+	# deeply inefficient!
+	for cs in fairness_cnts:
+		for i, c in enumerate(cs[0]):
+			assert(len(list(filter(lambda x: x in c, matching))) >= math.floor(cs[1][i]*n))
+	
+	cells_totals = [0]*len(cells)
+	for k in matching:
+		for i, c in enumerate(cells):
+			if k in c:
+				cells_totals[i] += 1
+	print(sum(cells_totals))
+	assert(sum(cells_totals) == n)
+	results.append(cells_totals)
+
+spliced_quantities = [[] for _ in range(len(cells))]
+
+for i in results:
+	for j in range(len(cells)):
+		spliced_quantities[j].append(i[j])
+
+print(cells)
+print([(avg(l), stats.stdev(l)) for l in spliced_quantities])
